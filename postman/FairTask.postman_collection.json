@@ -1,0 +1,140 @@
+{
+	"info": {
+		"_postman_id": "b32944a3-9e16-4bb6-989b-c88f864cbe32",
+		"name": "FairTask",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Collection",
+			"item": [
+				{
+					"name": "all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:3000/collection",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"collection"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "This is test",
+									"type": "text"
+								},
+								{
+									"key": "launchDate",
+									"value": "2023-04-01",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:3000/collection/create",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"collection",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "Test food",
+									"type": "text"
+								},
+								{
+									"key": "launchDate",
+									"value": "2023-10-01 11:45 PM ",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:3000/collection/update/1",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"collection",
+								"update",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "EventRegistration",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "email@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "collectionId",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:3000/event-registration/create",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"event-registration",
+								"create"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
