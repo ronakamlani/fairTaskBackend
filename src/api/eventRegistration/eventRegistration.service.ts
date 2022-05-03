@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getRepository, Repository } from 'typeorm';
+import { Brackets, getRepository, Repository } from 'typeorm';
 import { ReadStream } from 'typeorm/platform/PlatformTools';
 import { mailSendStatusEnum } from '../collection/collection.entity';
 import { CollectionService } from '../collection/collection.service';
@@ -63,10 +63,20 @@ export class EventRegistrationService {
       "collection.name",
       "collection.launchDate"
     ])
-    .andWhere("collection.launchDate >= :startDate",{startDate:startDate})
-    .andWhere("collection.launchDate < :endDate",{endDate:endDate})
+    .andWhere(new Brackets(qb=>{
+      qb
+        .where("collection.lastMailDate IS NULL")
+        .orWhere(new Brackets(iqb=>{
+          iqb
+          .where("collection.lastMailDate < :lastMailStartDate",{lastMailStartDate:startDate.toISOString()})
+          .andWhere("collection.lastMailDate >= :lastMailEndDate",{lastMailEndDate:endDate.toISOString()})
+        }));
+    }))
+    //.andWhere("collection.lastMailDate IS NOT NULL")
+    .andWhere("collection.launchDate >= :startDate",{startDate:startDate.toISOString()})
+    .andWhere("collection.launchDate < :endDate",{endDate:endDate.toISOString()})
     .andWhere("collection.launchDate IS NOT NULL")
-    .andWhere("collection.mailStatus = :status " , { status : mailSendStatusEnum.PENDING })
+    .andWhere("collection.mailStatus = :status " , { status : mailSendStatusEnum.DONE })
     .orderBy("collection.id","ASC");
     //
     //console.log("q.query",q.getQuery());
@@ -85,6 +95,7 @@ export class EventRegistrationService {
     )
     .innerJoin("ems.eventRegister","event_registration")
     .select([
+      "ems.id",
       "collection.id",
       "event_registration.email as er_email",
       "collection.name",

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { CreateCollectionDto } from './collection.dto';
 import { Collection, mailSendStatusEnum } from './collection.entity';
 
@@ -23,8 +23,14 @@ export class CollectionService {
   }
 
   public async update(id:number,body:CreateCollectionDto):Promise<Collection>{
+    body.mailStatus = mailSendStatusEnum.DONE;
     await this.repository.update(id, body);
     return this.getCollection(id);
+  }
+
+  public async updatePartial(id:number, data:any):Promise<UpdateResult>{
+    data.mailStatus = mailSendStatusEnum.DONE;
+    return await this.repository.update(id, data);
   }
 
   public async updateStatus(ids:number[],status: mailSendStatusEnum){

@@ -2,7 +2,7 @@ import BaseEntity from '../../common/db/base.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 
 export enum mailSendStatusEnum{
-  PENDING=1,
+  //PENDING=1,
   PROCESS=2,
   DONE=3
 }
@@ -17,8 +17,13 @@ export class Collection extends BaseEntity {
   @Index()
   public launchDate: Date;
 
+  @Column({ type: 'timestamp', default:null, nullable:true })
+  @Index()
+  public lastMailDate: Date;
 
-  @Column({type:'int',default:1})
+
+  @Column({type:'int',default:mailSendStatusEnum.DONE })
   @Index()
   public mailStatus:mailSendStatusEnum;
+
 }

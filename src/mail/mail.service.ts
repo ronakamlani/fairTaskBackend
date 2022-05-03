@@ -15,7 +15,7 @@ export class MailService {
       to: eventRegistrationStream.er_email,
       // from: '"Support Team" <support@example.com>', // override default from
       subject: `REMINDER - THE COLLECTION ${eventRegistrationStream.collection_name} LAUNCHES IN ${eventRegistrationStream.atTime}`,
-      template: './templates/confirmation', // `.hbs` extension is appended automatically
+      template: __dirname + './templates/confirmation', // `.hbs` extension is appended automatically
       context: { // ✏️ filling curly brackets with content
         collection_name : eventRegistrationStream.collection_name,
         time_text : eventRegistrationStream.atTime,

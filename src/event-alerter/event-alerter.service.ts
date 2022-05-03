@@ -34,24 +34,41 @@ export class EventAlerterService {
             //Find last hours events
             const q = await this.eventRegistrationSerivce.getEventRegistrationStreamByDate(startDate, endDate);
             let lastCollectionId = null;
+            
             q.on("data",async(chunk:EventRegistrationStreamInterface)=>{
-                console.log("chunk",chunk);
+                //console.log("chunk",chunk);
                 
                 if(lastCollectionId != chunk.collection_id){
-                    this.collectionService.updateStatus([chunk.collection_id], mailSendStatusEnum.PROCESS)
+                    await this.collectionService.updatePartial(chunk.collection_id,{
+                        lastMailDate: new Date(),
+                        mailStatus: mailSendStatusEnum.PROCESS,
+                    });
                     
                 }
                 
                 //Send mail process.
-                const sendMailInfo = await this.mailService.sendEventRegistration(chunk);
-                this.logger.log("sendMailInfo",sendMailInfo);
-                
                 const eventMailStatusCreate = new EventMailStatusCreate();
                 eventMailStatusCreate.collectionId = chunk.collection_id;
                 eventMailStatusCreate.eventRegistrationId = chunk.er_id;
-                eventMailStatusCreate.mailStatus = mailStatusEnum.SENT;
+                
                 eventMailStatusCreate.atTime = atTime;
-
+                
+                try{
+                    chunk.atTime = atTime;
+                    const sendMailInfo = await this.mailService.sendEventRegistration(chunk);
+                    this.logger.log("sendMailInfo",sendMailInfo);
+                    
+                    if(sendMailInfo.accepted.length > 0){
+                        eventMailStatusCreate.mailStatus = mailStatusEnum.SENT;
+                    }
+                    else{
+                        eventMailStatusCreate.mailStatus = mailStatusEnum.FAILED;
+                    }
+                }
+                catch(e){
+                    eventMailStatusCreate.mailStatus = mailStatusEnum.FAILED;
+                }
+                
                 await this.eventMailStatusService.createEventMailStatus(eventMailStatusCreate);
 
 
@@ -89,19 +106,32 @@ export class EventAlerterService {
         try{
             const q =  await this.eventRegistrationSerivce.getEventRegistrationStreamByMailFailed();
             q.on("data",async (chunk:EventRegistrationStreamInterface)=>{
-                console.log("chunk",chunk);
+                //console.log("chunk",chunk);
                 //Send mail process.
-                const sendMailInfo = await this.mailService.sendEventRegistration(chunk);
 
                 const eventMailStatusCreate = new EventMailStatusCreate();
                 eventMailStatusCreate.collectionId = chunk.collection_id;
                 eventMailStatusCreate.eventRegistrationId = chunk.er_id;
                 eventMailStatusCreate.mailStatus = mailStatusEnum.SENT;
                 eventMailStatusCreate.atTime = chunk.atTime;
-                
-                this.eventMailStatusService.createEventMailStatus(eventMailStatusCreate);
+                try{
+                    chunk.atTime = chunk.atTime;
+                    const sendMailInfo = await this.mailService.sendEventRegistration(chunk);
+                    this.logger.log("sendMailInfo",sendMailInfo);
+                    
+                    if(sendMailInfo.accepted.length > 0){
+                        eventMailStatusCreate.mailStatus = mailStatusEnum.SENT;
+                    }
+                    else{
+                        eventMailStatusCreate.mailStatus = mailStatusEnum.FAILED;
+                    }
+                }
+                catch(e){
+                    eventMailStatusCreate.mailStatus = mailStatusEnum.FAILED;
+                }
+                //const sendMailInfo = await this.mailService.sendEventRegistration(chunk);
 
-                this.logger.log("sendMailInfo",sendMailInfo);
+                await this.eventMailStatusService.update(chunk.ems_id, eventMailStatusCreate);
 
             });
             q.on("end",()=>{
